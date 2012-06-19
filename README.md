@@ -67,7 +67,7 @@ class Poll(gtools.View):
     @gtools.redirect
     def create(self):
         return {
-            'object': Poll.objects.create(**request.POST)
+            'object': Poll.objects.create(**self.request.POST)
         }
 
     @gtools.html("poll_form.html")
