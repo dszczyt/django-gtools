@@ -55,7 +55,7 @@ views.py
 from poll.models import Poll
 import gtools
 
-class Poll(gtools.View):
+class PollViews(gtools.Views):
     # request is an instance variable, we can access it everywhere !
 
     @gtools.html # access with html
@@ -99,4 +99,15 @@ poll_form.html
         </form>
     </body>
 </html>
+```
+
+And finaly, in the urls.py
+```python
+from django.conf.urls import pattern, include
+from polls.views import PollViews
+
+patterns = pattern(
+    '',
+    (r'^polls/', include(PollViews.patterns, namespace="polls", app_name="polls")),
+)
 ```
