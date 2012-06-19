@@ -108,6 +108,6 @@ from polls.views import PollViews
 
 patterns = pattern(
     '',
-    (r'^polls/', include(PollViews.patterns, namespace="polls", app_name="polls")),
+    (r'^polls/', include(PollViews.patterns(), namespace="polls", app_name="polls")),
 )
 ```
