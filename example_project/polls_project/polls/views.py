@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from polls_project.polls.models import Poll
 import gtools
+from django.shortcuts import get_object_or_404
 
 class PollViews(gtools.Views):
     # request is an instance variable, we can access it everywhere !
@@ -19,20 +20,31 @@ class PollViews(gtools.Views):
 
     @gtools.methods_allowed('POST')
     #@gtools.fallback_on_except(Poll.ValidationError, add)
+    @gtools.redirect()
     def create(self):
-        return {
-            'object': Poll.objects.create(**self.request.POST)
-        }
+        obj = Poll()
+        obj.__dict__.update(**self.request.POST)
+        obj.save()
+        return obj
 
     @gtools.methods_allowed('GET')
-    @gtools.html() #("poll_form.html")
+    @gtools.html()
     def edit(self, object_id):
-        pass
+        return {
+            'object': get_object_or_404(Poll, pk=object_id)
+        }
 
     @gtools.methods_allowed('POST')
     #@gtools.fallback_on_except(Poll.ValidationError, edit)
+    @gtools.redirect()
     def update(self, object_id):
-        pass
+        obj = get_object_or_404(
+            Poll,
+            pk=object_id,
+        )
+        obj.__dict__.update(self.request.POST)
+        obj.save()
+        return obj
 
     # I want to see the list with html, xml and json !
     @gtools.methods_allowed('GET')

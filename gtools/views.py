@@ -5,9 +5,19 @@ from functools import wraps
 from django.utils.decorators import classonlymethod, method_decorator
 from django.shortcuts import render_to_response
 from django.conf.urls.defaults import url, patterns, include
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseNotAllowed, HttpResponseRedirect
 
-from django.utils.decorators import available_attrs
+from functools import WRAPPER_ASSIGNMENTS as DEFAULT_WRAPPER_ASSIGNMENTS
+
+WRAPPER_ASSIGNMENTS = DEFAULT_WRAPPER_ASSIGNMENTS + ('urls', )
+
+def available_attrs(fn):
+    """
+    Return the list of functools-wrappable attributes on a callable.
+    This is required as a workaround for http://bugs.python.org/issue3445.
+    """
+    return tuple(a for a in WRAPPER_ASSIGNMENTS if hasattr(fn, a))
+
 
 class ObjectListNotInContext(Exception):
     def __str__(self):
@@ -93,6 +103,7 @@ def methods_allowed(*methods):
 
 def xml(template_name=None):
     def decorator(fn):
+        @wraps(fn, assigned=available_attrs(fn))
         def new_function(self, *args, **kwargs):
             return fn(self, *args, **kwargs)
         new_function.__name__ = fn.__name__
@@ -117,6 +128,26 @@ def json(template_name=None):
         return new_function
     return decorator
 
+def redirect(to=None, *args, **kwargs):
+    def decorator(func):
+        @wraps(func, assigned=available_attrs(func))
+        def _wrapped(self, *args, **kwargs):
+            from django.shortcuts import redirect
+            obj = func(self, *args, **kwargs)
+            if to == None:
+                return HttpResponseRedirect(obj.get_absolute_url())
+            if callable(to):
+                return HttpResponseRedirect(to(obj))
+            return redirect(to, *args, **kwargs)
+
+        if not hasattr(_wrapped, "urls"):
+            _wrapped.urls = getattr(func, "urls", [])
+        _wrapped.urls.append(
+            r'^(?P<name>%s)/$' % func.__name__
+        )
+        return _wrapped
+
+    return decorator
 
 class Views(object):
     request = None
