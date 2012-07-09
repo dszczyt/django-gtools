@@ -125,7 +125,7 @@ class Views(object):
         self.request = request
         return getattr(self, name)(**kwargs)
 
-    def urlpatterns(self):
+    def urlpatterns(self, namespace=None, app_name=None):
         urls = []
         for method_name, method in inspect.getmembers(self.__class__, predicate=inspect.ismethod):
             if not hasattr(method, "urls"):

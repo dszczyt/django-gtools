@@ -18,7 +18,7 @@ class PollViews(gtools.Views):
         }
 
     @gtools.methods_allowed('POST')
-    @gtools.fallback_on_except(Poll.ValidationError, add)
+    #@gtools.fallback_on_except(Poll.ValidationError, add)
     def create(self):
         return {
             'object': Poll.objects.create(**self.request.POST)
@@ -30,7 +30,7 @@ class PollViews(gtools.Views):
         pass
 
     @gtools.methods_allowed('POST')
-    @gtools.fallback_on_except(Poll.ValidationError, edit)
+    #@gtools.fallback_on_except(Poll.ValidationError, edit)
     def update(self, object_id):
         pass
 
