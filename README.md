@@ -7,16 +7,16 @@ HOW IT SHOULD WORK ?
 models.py
 ```python
 # -*- coding: utf-8 -*-
-from gtools import gmodels
+from gtools import models
 
-class Poll(gmodels.Model):
-    question = gmodels.CharField(max_length=200)
-    pub_date = gmodels.DateTimeField(u"date published")
+class Poll(models.Model):
+    question = models.CharField(max_length=200)
+    pub_date = models.DateTimeField(u"date published")
 
     @question.setter
     def question(self, value):
         if value[-1] != u"?":
-            raise ValidationError(u"Your question should end with a question mark.")
+            raise models.ValidationError(u"Your question should end with a question mark.")
         self.set_value('question', value)
 
     class Meta:
@@ -25,10 +25,10 @@ class Poll(gmodels.Model):
     def __unicode__(self):
         return self.question
 
-class Choice(gmodels.Model):
-    poll = gmodels.ForeignKey(Poll)
-    choice = gmodels.CharField(max_length=200)
-    votes = gmodels.IntegerField()
+class Choice(models.Model):
+    poll = models.ForeignKey(Poll)
+    choice = models.CharField(max_length=200)
+    votes = models.IntegerField()
 
     class Meta:
         accessible = ['choice']
@@ -55,7 +55,7 @@ views.py
 from poll.models import Poll
 import gtools
 
-class Poll(gtools.View):
+class PollViews(gtools.Views):
     # request is an instance variable, we can access it everywhere !
 
     @gtools.html # access with html
@@ -99,4 +99,15 @@ poll_form.html
         </form>
     </body>
 </html>
+```
+
+And finaly, in the urls.py
+```python
+from django.conf.urls import pattern, include
+from polls.views import PollViews
+
+patterns = pattern(
+    '',
+    (r'^polls/', include(PollViews.patterns(), namespace="polls", app_name="polls")),
+)
 ```
