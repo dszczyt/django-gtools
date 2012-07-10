@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import inspect
 from functools import wraps
+import sys
 
-from django.utils.decorators import classonlymethod, method_decorator
 from django.shortcuts import render_to_response
-from django.conf.urls.defaults import url, patterns, include
+from django.conf.urls.defaults import url, include
 from django.http import HttpResponseNotAllowed, HttpResponseRedirect
+from django.template import RequestContext
 
 from functools import WRAPPER_ASSIGNMENTS as DEFAULT_WRAPPER_ASSIGNMENTS
 
@@ -19,28 +20,16 @@ def available_attrs(fn):
     return tuple(a for a in WRAPPER_ASSIGNMENTS if hasattr(fn, a))
 
 
-class ObjectListNotInContext(Exception):
-    def __str__(self):
-        return "'object_list' key not found"
-
-class ObjectNotInContext(Exception):
-    def __str__(self):
-        return "'object' key not found"
-
 def html(_template_name=None):
     def decorator(func):
         @wraps(func, assigned=available_attrs(func))
         def _wrapped(self, *args, **kwargs):
             context = func(self, *args, **kwargs)
-            try:
-                object_list = context["object_list"]
-            except KeyError:
-                raise ObjectListNotInContext
 
             template_name = _template_name
             if not template_name:
-                opts = object_list.model._meta
-                app_label = opts.app_label
+                model_module = sys.modules[self.__class__.__module__]
+                app_label = model_module.__name__.split('.')[-2]
 
                 template_name = "%s/%s/%s.html" % (
                     app_label,
@@ -48,17 +37,36 @@ def html(_template_name=None):
                     func.func_name,
                 )
                 if callable(template_name):
-                    template_name = template_name(object_list)
+                    template_name = template_name(context)
 
             return render_to_response(
                 template_name,
                 self.context(**context),
+                RequestContext(self.request),
             )
 
         if not hasattr(_wrapped, "urls"):
             _wrapped.urls = getattr(func, "urls", [])
+
+        url_args = ""
+        func_args = inspect.getargspec(func).args[1:]
+        for arg in func_args:
+            if arg.endswith('_id'):
+                arg_regex = r'\d+'
+            else:
+                arg_regex = r'\w+'
+
+            url_args = r"%s/(?P<%s>%s)" % (
+                url_args,
+                arg,
+                arg_regex,
+            )
+
         _wrapped.urls.append(
-            r'^%s/$' % func.__name__
+            r'^%s%s/$' % (
+                func.func_name,
+                url_args,
+            )
         )
         return _wrapped
     return decorator

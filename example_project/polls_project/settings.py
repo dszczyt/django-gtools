@@ -120,8 +120,10 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'polls_project.polls',
     'django_extensions',
+    'gtools',
+
+    'polls_project.polls',
 )
 
 # A sample logging configuration. The only tangible logging

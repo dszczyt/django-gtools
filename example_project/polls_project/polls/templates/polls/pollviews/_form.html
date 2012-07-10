@@ -1,0 +1,9 @@
+{% load gtools %}
+
+{% csrf_token %}
+
+<p>
+<label>Question :</label>
+{% text_input object "question" "Default question" %}
+</p>
+<input type="submit" value="save"/>

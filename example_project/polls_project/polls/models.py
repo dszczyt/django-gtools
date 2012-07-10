@@ -3,9 +3,11 @@
 
 from gtools import models
 
+import datetime
+
 class Poll(models.Model):
     question = models.CharField(max_length=200)
-    pub_date = models.DateTimeField(u"date published")
+    pub_date = models.DateTimeField(u"date published", default=datetime.datetime.now())
 
     #@question.setter
     #def question(self, value):
@@ -18,6 +20,16 @@ class Poll(models.Model):
 
     def __unicode__(self):
         return self.question
+
+    @models.permalink
+    def get_absolute_url(self):
+        return (
+            "PollViews:show",
+            (),
+            {
+                'object_id': self.pk
+            }
+        )
 
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)

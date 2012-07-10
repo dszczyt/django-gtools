@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block body %}
-<h2>list</h2>
+<h2>List</h2>
 {% if object_list %}
 <table>
     <thead>
@@ -11,7 +11,13 @@
         {% for object in object_list %}
         <tr>
             <td>
-                {{ object }}
+                <a href="{% url PollViews:show object.pk %}">
+                    {{ object }}
+                </a>
+
+                <a href="{% url PollViews:edit object.pk %}">
+                    edit
+                </a>
             </td>
         </tr>
         {% endfor %}
