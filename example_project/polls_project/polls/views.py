@@ -23,7 +23,7 @@ class PollViews(gtools.Views):
     @gtools.redirect()
     def create(self):
         obj = Poll()
-        obj.__dict__.update(**self.request.POST)
+        obj.__dict__.update(self.request.POST)
         obj.save()
         return obj
 
@@ -54,4 +54,11 @@ class PollViews(gtools.Views):
     def list(self):
         return {
             'object_list': Poll.objects.all()
+        }
+
+    @gtools.methods_allowed('GET')
+    @gtools.html()
+    def show(self, object_id):
+        return {
+            'object': get_object_or_404(Poll, pk=object_id),
         }

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block body %}
+<h2>list</h2>
+{% if object_list %}
+<table>
+    <thead>
+        <th>Title</th>
+    </thead>
+    <tbody>
+        {% for object in object_list %}
+        <tr>
+            <td>
+                {{ object }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<strong>No poll in database</strong>
+{% endif %}
+
+<div class="actions">
+    <a href="{% url PollViews:add %}">
+        New poll
+    </a>
+</div>
+{% endblock %}

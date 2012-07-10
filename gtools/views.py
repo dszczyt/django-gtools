@@ -27,22 +27,6 @@ class ObjectNotInContext(Exception):
     def __str__(self):
         return "'object' key not found"
 
-def get_class_that_defined_method(meth):
-    from pprint import pprint
-    #pprint(
-    #    dict(
-    #        map(lambda x: (x, getattr(meth, x)), dir(meth))
-    #    )
-    #)
-    #pprint(meth.__dict__)
-
-    #obj = meth.im_self
-    print inspect.getmodule(meth)
-    for cls in inspect.getmro(meth.im_class):
-        if meth.__name__ in cls.__dict__:
-            return cls
-    return None
-
 def html(_template_name=None):
     def decorator(func):
         @wraps(func, assigned=available_attrs(func))
@@ -68,13 +52,13 @@ def html(_template_name=None):
 
             return render_to_response(
                 template_name,
-                context,
+                self.context(**context),
             )
 
         if not hasattr(_wrapped, "urls"):
             _wrapped.urls = getattr(func, "urls", [])
         _wrapped.urls.append(
-            r'^(?P<name>%s)/$' % func.__name__
+            r'^%s/$' % func.__name__
         )
         return _wrapped
     return decorator
@@ -95,7 +79,7 @@ def methods_allowed(*methods):
         @wraps(func, assigned=available_attrs(func))
         def _wrapped(self, *args, **kwargs):
             if self.request.method not in methods:
-                raise HttpResponseNotAllowed(methods)
+                return HttpResponseNotAllowed(methods)
             return func(self, *args, **kwargs)
         return _wrapped
     return decorator
@@ -110,7 +94,7 @@ def xml(template_name=None):
         if not hasattr(new_function, "urls"):
             new_function.urls = getattr(fn, "urls", [])
         new_function.urls.append(
-            r'^(?P<name>%s).xml$' % fn.__name__
+            r'^%s.xml$' % fn.__name__
         )
         return new_function
     return decorator
@@ -123,7 +107,7 @@ def json(template_name=None):
         if not hasattr(new_function, "urls"):
             new_function.urls = getattr(fn, "urls", [])
         new_function.urls.append(
-            r'^(?P<name>%s).json$' % fn.__name__
+            r'^%s.json$' % fn.__name__
         )
         return new_function
     return decorator
@@ -143,7 +127,7 @@ def redirect(to=None, *args, **kwargs):
         if not hasattr(_wrapped, "urls"):
             _wrapped.urls = getattr(func, "urls", [])
         _wrapped.urls.append(
-            r'^(?P<name>%s)/$' % func.__name__
+            r'^%s/$' % func.__name__
         )
         return _wrapped
 
@@ -156,6 +140,9 @@ class Views(object):
         self.request = request
         return getattr(self, name)(**kwargs)
 
+    def context(self, **kwargs):
+        return kwargs
+
     def urlpatterns(self, namespace=None, app_name=None):
         urls = []
         for method_name, method in inspect.getmembers(self.__class__, predicate=inspect.ismethod):
@@ -166,13 +153,23 @@ class Views(object):
                     url(
                         regexp,
                         self,
+                        kwargs = {
+                            'name': method_name,
+                        },
                         name = method_name
                     )
                 )
 
+        if app_name is None:
+            app_name = self.__class__.mro()[2].__name__
+        if namespace is None:
+            #namespace = "%s_%s" % (self.__class__.mro()[2].__name__, self.__class__.__name__)
+            namespace = self.__class__.__name__
+        print namespace
+
         return include(
             urls,
-            namespace = self.__class__.__name__,
-            app_name = self.__class__.mro()[1].__name__
+            namespace = namespace,
+            app_name = app_name,
         )
 
