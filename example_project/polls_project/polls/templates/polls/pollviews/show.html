@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block body %}
+<h2>Choices for poll "{{ object }}" :</h2>
+
+<div class="actions">
+    <a href="{% url PollViews:list %}">Back to list</a>
+</div>
+{% endblock %}

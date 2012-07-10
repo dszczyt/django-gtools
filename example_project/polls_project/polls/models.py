@@ -31,6 +31,12 @@ class Poll(models.Model):
             }
         )
 
+    class Meta:
+        fields_accessible = [
+            'question',
+            'pub_date',
+        ]
+
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)
     choice = models.CharField(max_length=200)
