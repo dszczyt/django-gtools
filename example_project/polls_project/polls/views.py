@@ -23,7 +23,7 @@ class PollViews(gtools.Views):
     @gtools.redirect()
     def create(self):
         obj = Poll()
-        obj.__dict__.update(self.request.POST)
+        obj._secure_update(self.request.POST)
         obj.save()
         return obj
 
@@ -42,7 +42,7 @@ class PollViews(gtools.Views):
             Poll,
             pk=object_id,
         )
-        obj.__dict__.update(self.request.POST)
+        obj._secure_update(self.request.POST)
         obj.save()
         return obj
 

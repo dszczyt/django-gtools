@@ -5,7 +5,8 @@
 {% if object_list %}
 <table>
     <thead>
-        <th>Title</th>
+        <th>Question</th>
+        <th>Actions</th>
     </thead>
     <tbody>
         {% for object in object_list %}
@@ -14,7 +15,8 @@
                 <a href="{% url PollViews:show object.pk %}">
                     {{ object }}
                 </a>
-
+            </td>
+            <td>
                 <a href="{% url PollViews:edit object.pk %}">
                     edit
                 </a>

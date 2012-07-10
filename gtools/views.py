@@ -134,9 +134,28 @@ def redirect(to=None, *args, **kwargs):
 
         if not hasattr(_wrapped, "urls"):
             _wrapped.urls = getattr(func, "urls", [])
+
+        url_args = ""
+        func_args = inspect.getargspec(func).args[1:]
+        for arg in func_args:
+            if arg.endswith('_id'):
+                arg_regex = r'\d+'
+            else:
+                arg_regex = r'\w+'
+
+            url_args = r"%s/(?P<%s>%s)" % (
+                url_args,
+                arg,
+                arg_regex,
+            )
+
         _wrapped.urls.append(
-            r'^%s/$' % func.__name__
+            r'^%s%s/$' % (
+                func.func_name,
+                url_args,
+            )
         )
+
         return _wrapped
 
     return decorator

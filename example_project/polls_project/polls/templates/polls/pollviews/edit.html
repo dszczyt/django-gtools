@@ -3,7 +3,7 @@
 {% block body %}
 <h2>Edit poll</h2>
 
-<form method="post" action="{% url PollViews:update %}">
+<form method="post" action="{% url PollViews:update object.pk %}">
     {% include "polls/pollviews/_form.html" %}
 </form>
 {% endblock %}

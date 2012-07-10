@@ -7,7 +7,7 @@ register = EasyLibrary()
 def hidden_input(context, obj, name, *values):
     return u"<input type=\"text\" name=\"%s\" value=\"%s\"/>" % (
         name,
-        filter(None, list(values)+[getattr(obj, name)])[0],
+        filter(lambda x: x, [getattr(obj, name)] + list(values))[0],
     )
 
 
@@ -15,6 +15,6 @@ def hidden_input(context, obj, name, *values):
 def text_input(context, obj, name, *values):
     return u"<input type=\"text\" name=\"%s\" value=\"%s\"/>" % (
         name,
-        filter(None, list(values)+[getattr(obj, name)])[0],
+        filter(lambda x: x, [getattr(obj, name)] + list(values))[0],
     )
 
