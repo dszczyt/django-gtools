@@ -5,6 +5,9 @@
 <p>
 <label>Question :</label>
 {% text_input object "question" "Default question" %}
+{% if errors.question %}
+<strong>{{ errors.question|join:"<br/>" }}</strong>
+{% endif %}
 </p>
 <input type="submit" value="save"/>
 <a href="{% url PollViews:list %}">Back to list</a>

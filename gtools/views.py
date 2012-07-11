@@ -7,6 +7,7 @@ from django.shortcuts import render_to_response
 from django.conf.urls.defaults import url, include
 from django.http import HttpResponseNotAllowed, HttpResponseRedirect
 from django.template import RequestContext
+from django.core.exceptions import ValidationError
 
 from functools import WRAPPER_ASSIGNMENTS as DEFAULT_WRAPPER_ASSIGNMENTS
 
@@ -76,6 +77,7 @@ def fallback_on_except(exception, fallback):
         @wraps(func, assigned=available_attrs(func))
         def _wrapped(self, *args, **kwargs):
             try:
+                print "Catching except..."
                 return func(self, *args, **kwargs)
             except exception:
                 return fallback(self, *args, **kwargs)
@@ -192,7 +194,6 @@ class Views(object):
         if namespace is None:
             #namespace = "%s_%s" % (self.__class__.mro()[2].__name__, self.__class__.__name__)
             namespace = self.__class__.__name__
-        print namespace
 
         return include(
             urls,

@@ -2,47 +2,45 @@
 from polls_project.polls.models import Poll
 import gtools
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
+from gtools.models import secure_update_object, get_context_for_object
 
 class PollViews(gtools.Views):
-    # request is an instance variable, we can access it everywhere !
-
-    def context(self, **kwargs):
-        return super(PollViews, self).context(
-            **kwargs
-        )
-
     @gtools.methods_allowed('GET', 'POST')
     @gtools.html() # access with html
     def add(self):
-        return {
-            'object': Poll()
-        }
+        return get_context_for_object(
+            Poll(),
+            self.request.POST or None,
+        )
 
     @gtools.methods_allowed('POST')
-    #@gtools.fallback_on_except(Poll.ValidationError, add)
+    @gtools.fallback_on_except(ValidationError, add)
     @gtools.redirect()
     def create(self):
-        obj = Poll()
-        obj._secure_update(self.request.POST)
+        obj = secure_update_object(
+            Poll(),
+            self.request.POST
+        )
         obj.save()
         return obj
 
-    @gtools.methods_allowed('GET')
+    @gtools.methods_allowed('GET', 'POST')
     @gtools.html()
     def edit(self, object_id):
-        return {
-            'object': get_object_or_404(Poll, pk=object_id)
-        }
+        return get_context_for_object(
+            get_object_or_404(Poll, pk=object_id),
+            self.request.POST or None,
+        )
 
     @gtools.methods_allowed('POST')
-    #@gtools.fallback_on_except(Poll.ValidationError, edit)
+    @gtools.fallback_on_except(ValidationError, edit)
     @gtools.redirect()
     def update(self, object_id):
-        obj = get_object_or_404(
-            Poll,
-            pk=object_id,
+        obj = secure_update_object(
+            get_object_or_404(Poll, pk=object_id),
+            self.request.POST
         )
-        obj._secure_update(self.request.POST)
         obj.save()
         return obj
 
